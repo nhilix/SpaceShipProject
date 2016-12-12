@@ -29,6 +29,7 @@ public class MissileControl : MonoBehaviour {
 	private List<Transform> engines;
 	private List<Vector2> pathLinesOrigin;
 	private List<Vector2> pathLinesEnd;
+	private Projectile whoFiredMe;
 
     //Wrapper for Debug.Log usage: Log(foo,bar,baz);
     public static string Log(params object[] data)
@@ -58,8 +59,12 @@ public class MissileControl : MonoBehaviour {
         configPID(targetPID);
         pathLinesOrigin = new List<Vector2>();
         pathLinesEnd = new List<Vector2>();
-        lineColor = new Color(Random.Range(0, 255) / 255f, Random.Range(0, 255) /255f, Random.Range(0, 255) / 255f);
-        missileId = GetComponent<Projectile>().whoFiredMe.GetComponent<CockpitControl> ().missilesFired;
+        lineColor = new Color(Random.Range(0, 255) / 255f, 
+			      Random.Range(0, 255) /255f,
+			      Random.Range(0, 255) / 255f);
+	whoFiredMe = GetComponentProjectile>().whoFiredMe;
+	CockpitControl cc = whoFiredMe.GetComponent<CockpitControl >();
+        missileId = cc.missilesFired;
     }
     void configPID(PIDController pid, float vScale=1f, float aScale=1f )
     {
@@ -82,19 +87,18 @@ public class MissileControl : MonoBehaviour {
             validHit &= hit.transform != transform;
             validHit &= hit.transform != target.transform;
             
-            if (hit.transform.parent) validHit &= hit.transform.parent.transform != target.transform;
-            validHit &= hit.transform != GetComponent<Projectile>().whoFiredMe.transform;
+            if (hit.transform.parent) 
+		validHit &= hit.transform.parent.transform != target.transform;
+            validHit &= hit.transform != whoFiredMe.transform;
             if (validHit)
             {
                 validHit &= Vector2.Distance(transform.position,
-					     target.transform.position) > Vector2.Distance(transform.position,
-						     				           hit.transform.position);
+					     target.transform.position)
+			  > Vector2.Distance(transform.position,
+					     hit.transform.position);
             }
             if (validHit)
-            {
                 validHit &= bWillHitTarget(hit);
-                //validHit &= Physics2D.Raycast(transform.position, target.transform.position);
-            }
         }
         return validHit;
     }
