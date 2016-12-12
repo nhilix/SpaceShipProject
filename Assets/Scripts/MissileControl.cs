@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-public class MissileControl : MonoBehaviour {R6
+public class MissileControl : MonoBehaviour {
 
 	public GameObject target;
 	public int fuel;
@@ -113,7 +113,7 @@ public class MissileControl : MonoBehaviour {R6
 	void FixedUpdate () {
 		if (fuel > 0) {
             Vector2 localForward = new Vector2 (-Mathf.Sin ((transform.rotation.eulerAngles.z / 180f) * Mathf.PI),
-                                                 [MawQMathf.Cos ((transform.rotation.eulerAngles.z / 180f) * Mathf.PI));
+                                                 Mathf.Cos ((transform.rotation.eulerAngles.z / 180f) * Mathf.PI));
             Rigidbody2D RB = GetComponent<Rigidbody2D>();
             Vector2 targetPos = new Vector2(target.transform.position.x, target.transform.position.y);
             Vector2 transPos = new Vector2(transform.position.x, transform.position.y);
@@ -140,7 +140,7 @@ public class MissileControl : MonoBehaviour {R6
             */
 
             // LASER SCANNING :)
-            [Ma;=// Find Raycast deviation from velocity that first clears obstacle
+            // Find Raycast deviation from velocity that first clears obstacle
             // hitL and hitR are most recent raycast of deviated velocity
        
             lastTargetToAvoid = targetToAvoidCollision;
