@@ -195,7 +195,9 @@ public class MissileControl : MonoBehaviour {
                if (!validHit(hitR) && degreeOffsetR == 0)
                {
                   rightCastTarget = RotateVector(scanOrigin, -(degreeOffset - 1));
-                  raycastAvoidObstacleR = Physics2D.Raycast(transPos, rightCastTarget, scanLength);
+                  raycastAvoidObstacleR = Physics2D.Raycast( transPos,
+                                                             rightCastTarget,
+                                                             scanLength );
                   degreeOffsetR = -degreeOffset;
                }
             }
