@@ -116,8 +116,12 @@ public class MissileControl : MonoBehaviour {
    }
    void FixedUpdate () {
       if (fuel > 0) {
-         Vector2 localForward = new Vector2 (-Mathf.Sin ((transform.rotation.eulerAngles.z / 180f) * Mathf.PI),
-                                              Mathf.Cos ((transform.rotation.eulerAngles.z / 180f) * Mathf.PI));
+         Vector2 localForward = new Vector2 (-Mathf.Sin (
+                                                  transform.rotation.eulerAngles.z 
+                                                * Mathf.Deg2Rad ),
+                                              Mathf.Cos ( 
+                                                  transform.rotation.eulerAngles.z
+                                                * Mathf.Deg2Rad );
          Rigidbody2D RB = GetComponent<Rigidbody2D>();
          Vector2 targetPos = new Vector2( target.transform.position.x,
                                           target.transform.position.y );
@@ -134,15 +138,14 @@ public class MissileControl : MonoBehaviour {
          pathLinesOrigin.Add(transPos);
          pathLinesEnd.Add(transPos + localForward.normalized * 0.15f);
 
-         CockpitControl shipControl = GetComponent<Projectile>().whoFiredMe.GetComponent<CockpitControl>();
-         if (missileId >= shipControl.pathLinesOriginList.Count)
+         if (missileId >= cc.pathLinesOriginList.Count)
          {
-          shipControl.pathLinesOriginList.Add(new List<Vector2> () );
-          shipControl.pathLinesEndList.Add(new List<Vector2> () );
-          shipControl.pathLinesColors.Add(lineColor);
+            cc.pathLinesOriginList.Add(new List<Vector2> () );
+            cc.pathLinesEndList.Add(new List<Vector2> () );
+            cc.pathLinesColors.Add(lineColor);
          }
-         shipControl.pathLinesOriginList[missileId - 1] = pathLinesOrigin;
-         shipControl.pathLinesEndList[missileId - 1] = pathLinesEnd;
+         cc.pathLinesOriginList[missileId - 1] = pathLinesOrigin;
+         cc.pathLinesEndList[missileId - 1] = pathLinesEnd;
 
          // LASER SCANNING :)
          // Find Raycast deviation from velocity that first clears obstacle
