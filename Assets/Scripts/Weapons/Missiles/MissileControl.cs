@@ -246,13 +246,15 @@ public class MissileControl : MonoBehaviour {
 
             distFromPathToTargetL = (offsetL - transPos).magnitude
                                     * Mathf.Sin( Mathf.Deg2Rad 
-                                    * Vector2.Angle(offsetL - transPos, targetPos - transPos));
+                                    * Vector2.Angle( offsetL - transPos, 
+                                                     targetPos - transPos ) );
             distFromPathToTargetR = (offsetR - transPos).magnitude 
                                     * Mathf.Sin( Mathf.Deg2Rad
-                                    * Vector2.Angle(offsetR - transPos, targetPos - transPos));
+                                    * Vector2.Angle( offsetR - transPos,
+                                                     targetPos - transPos ) );
 
-            float angleToVelL = Vector2.Angle(offsetR - transPos, scanOrigin);
-            float angleToVelR = Vector2.Angle(offsetL - transPos, scanOrigin);
+            float angleToVelL = Vector2.Angle( offsetR - transPos, scanOrigin );
+            float angleToVelR = Vector2.Angle( offsetL - transPos, scanOrigin );
             if (distFromPathToTargetL < distFromPathToTargetR)
             {
                offset = offsetL;
@@ -272,11 +274,14 @@ public class MissileControl : MonoBehaviour {
                
          }
             
-         if (targetToAvoidCollision == Vector2.zero && lastTargetToAvoid != Vector2.zero)
+         if (    targetToAvoidCollision == Vector2.zero 
+              && lastTargetToAvoid != Vector2.zero )
          {
-             targetToAvoidCollision = targetPos + 0.9f * (lastTargetToAvoid - targetPos);
+             targetToAvoidCollision = targetPos 
+                                      + 0.9f * ( lastTargetToAvoid - targetPos );
          } 
-         Vector2 targetToUse = targetToAvoidCollision != Vector2.zero ? targetToAvoidCollision : targetPos;
+         Vector2 targetToUse = targetToAvoidCollision != Vector2.zero 
+                             ? targetToAvoidCollision : targetPos;
          Debug.DrawLine( targetToUse + new Vector2( 0.3f, 0.3f),
                          targetToUse + new Vector2(-0.3f, -.3f), Color.yellow);
          Debug.DrawLine( targetToUse + new Vector2( 0.3f, -0.3f), 
@@ -286,10 +291,10 @@ public class MissileControl : MonoBehaviour {
          RB.AddForce(localForward.normalized * thrust);
          fuel -= 1;
       } else {
-            foreach ( Transform engine in engines ) {
-                    engine.gameObject.GetComponent<SpriteRenderer> ().enabled = false;
-            }
-            GetComponent<MissileControl> ().enabled = false;
+         foreach ( Transform engine in engines ) {
+            engine.gameObject.GetComponent<SpriteRenderer> ().enabled = false;
+         }
+         GetComponent<MissileControl> ().enabled = false;
       }
    }
 }
