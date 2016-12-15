@@ -8,6 +8,7 @@ public class MissileControl : MonoBehaviour {
    public GameObject target;
    public int fuel;
    public float maxThrust;
+   public float returnToTargPercent = 0.9f;
    public int missileId;
    public double torqueProportionalConstant;
    public double torqueDerivativeConstant;
@@ -23,13 +24,15 @@ public class MissileControl : MonoBehaviour {
    private float thrust;
    private float framesSinceLastAvoid;
    private Color lineColor;
+   private Vector2 lastPosToAvoid;
    private Vector2 lastTargetToAvoid;
    private Vector2 targetToAvoidCollision;
    private Transform[] transforms;
    private List<Transform> engines;
    private List<Vector2> pathLinesOrigin;
    private List<Vector2> pathLinesEnd;
-   private Projectile whoFiredMe;
+   private GameObject whoFiredMe;
+   private CockpitControl cc;
 
    //Wrapper for Debug.Log usage: Log(foo,bar,baz);
    public static string Log(params object[] data)
@@ -62,8 +65,8 @@ public class MissileControl : MonoBehaviour {
       lineColor = new Color(  Random.Range(0, 255) / 255f, 
                               Random.Range(0, 255) / 255f,
                               Random.Range(0, 255) / 255f );
-      whoFiredMe = GetComponentProjectile>().whoFiredMe;
-      CockpitControl cc = whoFiredMe.GetComponent<CockpitControl >();
+      whoFiredMe = GetComponent<Projectile> ().whoFiredMe;
+      cc = whoFiredMe.GetComponent<CockpitControl >();
       missileId = cc.missilesFired;
    }
    void configPID(PIDController pid, float vScale=1f, float aScale=1f )
@@ -94,7 +97,7 @@ public class MissileControl : MonoBehaviour {
          {
             validHit &= Vector2.Distance(transform.position,
                                           target.transform.position)
-                      > Vector2.Distance(transform.position,
+                           > Vector2.Distance(transform.position,
                                           hit.transform.position);
          }
          if (validHit)
@@ -116,12 +119,13 @@ public class MissileControl : MonoBehaviour {
    }
    void FixedUpdate () {
       if (fuel > 0) {
-         Vector2 localForward = new Vector2 (-Mathf.Sin (
+         Vector2 localForward = new Vector2 (
+                                            -Mathf.Sin (
                                                   transform.rotation.eulerAngles.z 
                                                 * Mathf.Deg2Rad ),
                                               Mathf.Cos ( 
                                                   transform.rotation.eulerAngles.z
-                                                * Mathf.Deg2Rad );
+                                                * Mathf.Deg2Rad ) );
          Rigidbody2D RB = GetComponent<Rigidbody2D>();
          Vector2 targetPos = new Vector2( target.transform.position.x,
                                           target.transform.position.y );
@@ -171,7 +175,7 @@ public class MissileControl : MonoBehaviour {
          {
             RaycastHit2D hitL = hit;
             RaycastHit2D hitR = hit;
-            while ((validHit(hitR) || validHit(hitL)) && degreeOffset < 90f)
+            while ((validHit(hitR) || validHit(hitL)) && degreeOffset < 180f)
             {
                degreeOffset += degreeStepSize;
 
@@ -255,6 +259,7 @@ public class MissileControl : MonoBehaviour {
 
             float angleToVelL = Vector2.Angle( offsetR - transPos, scanOrigin );
             float angleToVelR = Vector2.Angle( offsetL - transPos, scanOrigin );
+            Log(distFromPathToTargetL, distFromPathToTargetR);
             if (distFromPathToTargetL < distFromPathToTargetR)
             {
                offset = offsetL;
@@ -267,23 +272,34 @@ public class MissileControl : MonoBehaviour {
             }
 
             targetToAvoidCollision = offset;
+            lastPosToAvoid = raycastAvoidObstacle.point;
             // DEBUG LINES
-            //if (targetToAvoidCollision != Vector2.zero) Debug.Break();
+            // if (targetToAvoidCollision != Vector2.zero) Debug.Break();
             Debug.DrawLine(localForward + transPos, transPos, Color.white);
             Debug.DrawLine(transPos, transPos + scanOrigin * 10f, Color.black);
                
          }
             
-         if (    targetToAvoidCollision == Vector2.zero 
-              && lastTargetToAvoid != Vector2.zero )
+         if ( targetToAvoidCollision == Vector2.zero 
+                && lastTargetToAvoid != Vector2.zero )
          {
-             targetToAvoidCollision = targetPos 
-                                      + 0.9f * ( lastTargetToAvoid - targetPos );
+            if (Vector2.Distance(transPos, lastTargetToAvoid) > Vector2.Distance(lastPosToAvoid, lastTargetToAvoid) )
+            {
+               //targetToAvoidCollision = targetPos
+               //                         + (1f - returnToTargPercent / ((lastTargetToAvoid - transPos).magnitude * (lastTargetToAvoid - transPos).magnitude)) * (lastTargetToAvoid - targetPos);
+               targetToAvoidCollision = targetPos
+                                                      + 0.999f * ( lastTargetToAvoid - targetPos );
+            } else
+            {
+               targetToAvoidCollision = targetPos
+                                                      + returnToTargPercent * ( lastTargetToAvoid - targetPos );
+            }
+             
          } 
          Vector2 targetToUse = targetToAvoidCollision != Vector2.zero 
                              ? targetToAvoidCollision : targetPos;
          Debug.DrawLine( targetToUse + new Vector2( 0.3f, 0.3f),
-                         targetToUse + new Vector2(-0.3f, -.3f), Color.yellow);
+                         targetToUse + new Vector2(-0.3f, -0.3f), Color.yellow);
          Debug.DrawLine( targetToUse + new Vector2( 0.3f, -0.3f), 
                          targetToUse + new Vector2(-0.3f, 0.3f), Color.yellow);
          float torque = targetPID.generateTorque(targetToUse);
